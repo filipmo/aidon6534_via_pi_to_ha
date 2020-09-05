@@ -1,6 +1,9 @@
-## 0.3 First small parser test
+## 0.4 Test to send one value to mqtt
+version = '0.4' 
+
 import serial
-version = '0.3' 
+import paho.mqtt.client as mqtt
+
 
 print('serial2mqtt, version: ' + version)
 
@@ -18,7 +21,9 @@ def setDate(name, unit, d):
 	hour = str(d[3]+1)
 	minute = str(d[4])
 	second = str(d[5])
-	print('{} is  {}/{} {}:{}:{}'.format(name, day, month, hour, minute, second))
+	value='{}_{} {}:{}:{}'.format(month, day, hour, minute, second)
+	print('Datetime is ' + value)
+	return(value)
 	
 def format83(name, unit, d):
 	value=str(int.from_bytes(d, byteorder='big')/1000)
@@ -35,21 +40,25 @@ def format31(name, unit, d):
 
 aidon_map={
 	b'\x00\x01\x00\x00\xff': {'name': 'datetime', 'unit': '',
-		'd0': 4, 'dn': 6, 'func': setDate },
+		'd0': 4, 'dn': 6, 'mqtt': 'n', 'func': setDate },
 	b'\x00\x01\x08\x00\xff': {'name': 'active_import_energy', 'unit': 'kWh',
-		'd0': 1, 'dn': 4, 'func': format83 },
+		'd0': 1, 'dn': 4, 'mqtt': 'y', 'func': format83 },
 	b'\x00\x20\x07\x00\xff': {'name': 'phase_voltage_L1', 'unit': 'V',
-		'd0': 1, 'dn': 2, 'func': format31 },
+		'd0': 1, 'dn': 2, 'mqtt': 'y', 'func': format31 },
 	b'\x00\x34\x07\x00\xff': {'name': 'phase_voltage_L2', 'unit': 'V',
-		'd0': 1, 'dn': 2, 'func': format31 },
+		'd0': 1, 'dn': 2, 'mqtt': 'n', 'func': format31 },
 	b'\x00\x48\x07\x00\xff': {'name': 'phase_voltage_L3', 'unit': 'V',
-		'd0': 1, 'dn': 2, 'func': format31 },
+		'd0': 1, 'dn': 2, 'mqtt': 'n', 'func': format31 },
 	b'\x00\x71\x07\x00\xff': {'name': 'justthelastoneasimissthedot', 'unit': 'None',
 		'd0': 5, 'dn': 6, 'func': setDate }
 }
 
 
 print('Using serial settings: ' + str(ser))
+
+mqClient = mqtt.Client("han")
+mqClient.username_pw_set("user", "pwd")
+mqClient.connect("mqtt-host", 1883)
 
 while True:
 	current_data={}	#array with read data in bytearrys, indexed by numerical strings.
@@ -72,13 +81,18 @@ while True:
 			if key in aidon_map:
 				name = aidon_map[key]['name']
 				unit = aidon_map[key]['unit']
+				publish = aidon_map[key]['mqtt']
 				d0 = aidon_map[key]['d0']
 				dn = aidon_map[key]['dn']
 				
 				next_row = current_data[str(i+1)]	# Data is in beginning of next row. A little bit dangerous TODO
 				data = next_row[d0:d0+dn]
 				
-				aidon_map[key]['func'](name, unit, data)
+				value=aidon_map[key]['func'](name, unit, data)
+				print('value is: ' + value)
+				if (publish == 'y'):
+					mqClient.publish(name, value)
+				
 	
 	#print(current_data)
 
