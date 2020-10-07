@@ -1,5 +1,5 @@
-## 0.6 Fix secrets TODO: Fix watchdog
-version = '0.6' 
+## 0.7 Fixed a potential crash bug.     TODO: Fix watchdog
+version = '0.7' 
 
 import serial
 import secret
@@ -99,13 +99,19 @@ while True:
 					d0 = aidon_map[key]['d0']
 					dn = aidon_map[key]['dn']
 					
-					next_row = current_data[str(i+1)]	# Data is in beginning of next row. A little bit dangerous TODO
-					data = next_row[d0:d0+dn]
+					next_row = current_data[str(i+1)]	# Data is in beginning of next row. A little bit dangerous, so let us check the length.
+					if (len(next_row) >= d0+dn):
+						data = next_row[d0:d0+dn]
 					
-					value=aidon_map[key]['func'](name, unit, data)
-					if (publish == 'y'):
-						print('value is: ' + value)
-						mqClient.publish(name, value)
+						value=aidon_map[key]['func'](name, unit, data)
+						if (publish == 'y'):
+							print('value is: ' + value)
+							mqClient.publish(name, value)
+					else:
+						print ('ERROR: next row after FF is too short when reading {}.'.format(name))
+						print ('Ignoring data:')
+						print (str(raw_data))
+						
 		else:
 			print ('ERROR: Raw data had length: {}. Number of ff seems to be : {}'.format(len(raw_data), len(current_data)))
 			print ('Ignoring data:')
