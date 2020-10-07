@@ -1,7 +1,8 @@
-## 0.5 Added size check. TODO: Fix secrets TODO: Fix watchdog
-version = '0.5' 
+## 0.6 Fix secrets TODO: Fix watchdog
+version = '0.6' 
 
 import serial
+import secret
 import paho.mqtt.client as mqtt
 
 
@@ -68,9 +69,9 @@ aidon_map={
 
 print('Using serial settings: ' + str(ser))
 
-mqClient = mqtt.Client("han")
-mqClient.username_pw_set("<username>", "<password>")
-mqClient.connect("<hostname>", 1883)
+mqClient = mqtt.Client(secret.mqc_client)
+mqClient.username_pw_set(secret.mqc_user, secret.mqc_pwd)
+mqClient.connect(secret.mqc_host, secret.mqc_port)
 
 
 while True:
