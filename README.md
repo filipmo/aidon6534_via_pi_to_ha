@@ -61,12 +61,14 @@ sensor:
 Could also be called "mistakes done", or kindness to my future self
 * Wrong BAUD will also provide data, but then you shall not expect to have the full data.
 * parsing the HAN interface is not as complicated as you first thought. This information seems to be enough:
-  * Each row has the following format: <something1><obis code><1 byte><data><something2>, where:
-    * <something1> is what it says.
-    * <obis code> is the 5-byte code you can find in different specifications, e.g. 0.1.7.0.255 means "momentary active power". It always seems to end with 255. I used that fact and started to understand.
-    * <1 byte> took some time before I realized that the data did not follow right after <obis code>. <1byte> seems to be 6 or 12 in my examples.
-    * <data> Format varies for different obis codes. It is explained in https://www.energiforetagen.se/globalassets/medlemsportalen-oppet/branschrekommendation-lokalt-granssnitt-v1_3.pdf?v=fFJaQd1HAO6_cV_CtNnN6RJ66Js
-    * <something2> is again to me what it says.
+* Each row has the following format: < something1 >< obiscode >< 1byte >< data >< something2 >, where:
+  *   < something1 > is what it says.
+  *   < obiscode > is the 5-byte code you can find in different specifications, e.g. 0.1.7.0.255 means "momentary active power". It always seems to end with 255. I used that fact and started to understand.
+  *   < 1byte > took some time before I realized that the data did not follow right after < obiscode >. < 1byte > seems to be 6 or 12 in my examples.
+  *   < data > Format varies for different obis codes. It is explained in https://www.energiforetagen.se/globalassets/medlemsportalen-oppet/branschrekommendation-lokalt-granssnitt-v1_3.pdf?v=fFJaQd1HAO6_cV_CtNnN6RJ66Js
+   < something2 > is again to me what it says.
+
+    
 * Aidon 6534 has different HAN flavours. Mine is 6442SE, and has a RJ12 connector. I found a description for Norwegian interface before I was aware of that, and bough an MBUS interface. THAT WAS THE WRONG INTERFACE for the "Tekniska Veken" variant I had.
 * Data request pin needs current, and using a too big resistor as R1 will not give any data request signal.
 * Printing a bytes string in python varies format dependent on if you print many or one element. There are three different printouts used:
